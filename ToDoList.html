@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="box">
+        <div class="title01">
+            <h3>To Do</h3>
+        </div>
+        <div class="main">
+            <input type="text" id="todo" placeholder="Please enter what you want to do!" onkeyup="handleEnter(event)">
+            <button id="in" onclick="appendDiv()">In</button>
+            <ul class="list">
+        
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleBtn(button) {
+            const li = button.closest('li');
+            li.style.display = 'none';
+        }
+
+        function appendDiv() {
+            const infor = document.getElementById('todo').value;
+
+            if (!infor.trim()) {
+                alert("내용을 입력해주세요");
+                return; // return 무조건 출력해줘야함 
+                // -> 그렇지 않으면 안내창은 뜨는데데 빈 리스트가 출력됨
+            } // 빈 입력일 경우 추가하지 않음
+
+            const element = document.querySelector('.list');
+            const li = document.createElement("li");
+            li.setAttribute('class', 'ck-item');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            li.setAttribute('class', 'ck01');
+
+            const textNode = document.createElement("span");
+            textNode.textContent = infor;
+
+            const removeButton = document.createElement("button");
+            removeButton.classList.add('ck');
+            removeButton.textContent = "⨉";
+
+            removeButton.onclick = function() {
+                li.style.display = 'none';
+            };
+
+            checkbox.onclick = function() {
+                textNode.style.textDecorationLine = checkbox.checked ? "line-through" : "";
+            };
+
+            li.appendChild(checkbox);
+            li.appendChild(textNode);
+            li.appendChild(removeButton);
+            element.appendChild(li);
+
+            document.getElementById('todo').value = ''; 
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                appendDiv(); // Enter 키를 누르면 appendDiv 호출
+            }
+        }
+    </script>
+</body>
+</html>
