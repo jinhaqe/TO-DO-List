@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>To-Do List</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,62 +12,101 @@
             <h3>To Do</h3>
         </div>
         <div class="main">
-            <input type="text" id="todo" placeholder="Please enter what you want to do!">
-            <button id="in" onclick="appendDiv()"> In </button>
-            <ul class="list">
-        
-            </ul>
+            <!-- 입력 필드, Enter 키로도 항목 추가 가능 -->
+            <input type="text" id="todo" placeholder="Please enter what you want to do!" onkeyup="handleEnter(event)">
+            <!-- 버튼 클릭 시 appendDiv 함수 호출 -->
+            <button id="in" onclick="appendDiv()">In</button>
+            <!-- 할 일 항목을 추가할 리스트 -->
+            <ul class="list"></ul>
         </div>
     </div>
 
     <script>
-        function toggleBtn(button) {
-            // 'this'는 클릭된 버튼을 참조합니다.
-            const li = button.closest('li'); // 버튼이 속한 li 요소를 찾습니다.
-            li.style.display = 'none'; // 해당 li 요소를 숨깁니다.
+        // 로컬스토리지에서 데이터를 가져오거나, 없으면 빈 배열을 사용
+        const todoList = JSON.parse(localStorage.getItem('todos')) || [];
+
+        // 로컬스토리지에 할 일 목록 저장하는 함수
+        function saveToLocalStorage() {
+            localStorage.setItem('todos', JSON.stringify(todoList));  // todoList 배열을 문자열로 변환하여 저장
         }
 
-        function appendDiv() {
-            const infor = document.getElementById('todo').value;  // 'todo' input의 값을 가져옴
+        // 화면에 할 일 추가하는 함수
+        function appendDiv(todoText = '', isChecked = false) {
+            // 입력값이 없으면 todoText가 공백으로 들어오며, 입력 필드에서 가져오는 방식
+            const infor = todoText || document.getElementById('todo').value.trim();
+            // 입력값이 없으면 경고창 띄우고 함수 종료
+            if (!infor) {
+                alert("내용을 입력해주세요");
+                return; // return을 출력하지 않으면 경고창은 뜨고 빈 배열이 입력됨.
+            }
 
-            const element = document.querySelector('.list');  // 'list' 클래스를 가진 요소를 선택
+            const element = document.querySelector('.list');  // 할 일 리스트를 담을 ul 요소
+            const li = document.createElement("li");  // li 요소 생성
+            li.setAttribute('class', 'ck-item');  // li에 클래스 추가
 
-            const li = document.createElement("li");
-            li.setAttribute('class', 'ck-item');  // 클래스 이름은 문자열로
+            const checkbox = document.createElement('input');  // 체크박스 생성
+            checkbox.type = 'checkbox';
+            checkbox.checked = isChecked;  // 체크 여부 설정
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox'; // 체크박스를 생성
-            li.setAttribute('class', 'ck01');
+            const textNode = document.createElement("span");  // 텍스트를 담을 span 생성
+            textNode.textContent = infor;  // 텍스트 내용을 할 일 내용으로 설정
 
-            const textNode = document.createElement("span");
-            textNode.textContent = infor; // 'infor' 값을 텍스트로 추가
-
-            const removeButton = document.createElement("button");
+            const removeButton = document.createElement("button");  // 삭제 버튼 생성
             removeButton.classList.add('ck');
-            removeButton.textContent = "⨉";
+            removeButton.textContent = "⨉";  // 버튼에 '⨉' 텍스트 추가
 
-            removeButton.onclick = function() {
-                li.style.display = 'none';  // 해당 li 요소를 숨깁니다.
+            // 삭제 버튼 클릭 시
+            removeButton.onclick = function () {
+                const index = Array.from(element.children).indexOf(li);  // 클릭된 li의 인덱스 찾기
+                todoList.splice(index, 1);  // 배열에서 해당 요소 삭제
+                saveToLocalStorage();  // 로컬스토리지에 반영
+                element.removeChild(li);  // 화면에서 해당 li 요소 제거
+            };
+            // 반영하기 전에 화면에서 요소를 삭제하면, 로컬스토리지에 반영된 배열이 실제 DOM 요소와 일치하지 않게 될 수 있습니다.
+            // 화면에서 요소를 삭제하기 전에 로컬스토리지에 반영해야 합니다.
+
+            // 체크박스 클릭 시
+            checkbox.onclick = function () {
+                const index = Array.from(element.children).indexOf(li);  // 클릭된 li의 인덱스 찾기
+                todoList[index].isChecked = checkbox.checked;  // 체크 상태 업데이트
+                // 텍스트에 줄을 그어주는 스타일 변경
+                textNode.style.textDecorationLine = checkbox.checked ? "line-through" : "";
+                saveToLocalStorage();  // 로컬스토리지에 반영
             };
 
-            // 체크박스를 클릭했을 때 텍스트에 줄을 그어주는 이벤트 리스너 추가
-            checkbox.onclick = function() {
-                if (checkbox.checked) {
-                    textNode.style.textDecorationLine = "line-through";  // 체크되면 줄을 긋기
-                } else {
-                    textNode.style.textDecorationLine = "";  // 체크 해제되면 줄 제거
-                }
-            };
+            // li에 생성된 요소들 추가
+            li.appendChild(checkbox);
+            li.appendChild(textNode);
+            li.appendChild(removeButton);
+            element.appendChild(li);
 
-            li.appendChild(checkbox); // 체크박스를 li에 추가
-            li.appendChild(textNode);  // 텍스트를 li에 추가
-            li.appendChild(removeButton);  // 삭제 버튼을 li에 추가
+            // 새 항목 추가 시 로컬스토리지 업데이트
+            if (!todoText) {
+                todoList.push({ text: infor, isChecked: false });  // todoList 배열에 항목 추가
+                saveToLocalStorage();  // 로컬스토리지에 저장
+            }
 
-            element.appendChild(li);  // 'list' 요소에 li를 추가
+            // 체크박스 스타일 적용
+            textNode.style.textDecorationLine = isChecked ? "line-through" : "";
 
-            // 입력란을 초기화
-            document.getElementById('todo').value = ''; 
+            // 입력 필드 초기화
+            document.getElementById('todo').value = '';
         }
+
+        // Enter 키 입력 시에도 항목을 추가하도록 처리
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                appendDiv();  // Enter 키가 눌리면 appendDiv 함수 호출
+            }
+        }
+
+        // 페이지 로드 시 로컬스토리지에 저장된 데이터를 화면에 표시
+        window.onload = function () {
+            todoList.forEach(todo => appendDiv(todo.text, todo.isChecked));  // 저장된 할 일을 화면에 추가
+        };
     </script>
+    
 </body>
 </html>
+
+
