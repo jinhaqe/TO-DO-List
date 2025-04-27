@@ -50,6 +50,7 @@
 
 <br>
 
-![메인](https://github.com/user-attachments/assets/ee06631d-2939-4b5f-b64e-7bac443a9ade)
+![image](https://github.com/user-attachments/assets/b2e2c74a-5cb0-444e-a0bf-653cf4a7cc46)
+
 
 
